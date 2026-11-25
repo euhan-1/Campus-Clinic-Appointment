@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+{% set is_doctor = session.role == 'Doctor' %}
+<div class="stack">
+  <div>
+    <h2>{{ 'Appointments' if session.role == 'Nurse' else 'My Appointments' }}</h2>
+    <p class="muted sub">{{ 'Update the status when a patient does not show up or cancels.' if session.role == 'Nurse' else 'Appointments booked on your schedule.' }}</p>
+  </div>
+  <form method="get" class="row">
+    <div><label for="ad">Date</label><input id="ad" type="date" name="date" value="{{ when if when != 'all' else '' }}"></div>
+    <button class="btn ghost">Show date</button>
+    <a class="btn ghost" href="{{ url_for('appointments', date='all') }}">All dates</a>
+  </form>
+  <div class="card flush">
+    <table class="responsive">
+      <thead><tr><th>When</th><th>Patient</th>{% if not is_doctor %}<th>Doctor</th>{% endif %}<th>Visit</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr><td data-label="When"><span>{{ r.appointment_date }}<div class="muted small">{{ r.appointment_time }}</div></span></td>
+            <td data-label="Patient"><span>{{ r.pfirst }} {{ r.plast }}<div class="muted small">{{ r.student_number }}</div></span></td>
+            {% if not is_doctor %}<td data-label="Doctor">Dr. {{ r.dlast }}</td>{% endif %}
+            <td data-label="Visit"><span>{{ r.visit_type }}<div class="muted small">{{ r.reason }}</div></span></td>
+            <td data-label="Status"><span class="pill {{ r.status }}">{{ r.status }}</span></td>
+            <td>
+              {% if r.status in ('Pending', 'Confirmed') %}
+                {% if session.role == 'Nurse' %}
+                  <form class="inline" method="post" action="{{ url_for('update_status', appointment_id=r.appointment_id) }}">
+                    <button name="status" value="No-show" class="btn small ghost">No-show</button>
+                    <button name="status" value="Cancelled" class="btn small danger">Cancel</button>
+                  </form>
+                {% elif r.status == 'Confirmed' %}
+                  <a class="btn small" href="{{ url_for('consult', appointment_id=r.appointment_id) }}">Record consultation</a>
+                {% endif %}
+              {% endif %}
+            </td></tr>
+        {% else %}<tr><td colspan="{{ 5 if is_doctor else 6 }}" class="muted">No appointments found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+/* Shared styles for every page. Look and feel taken from clinic-prototype.html. Plain CSS, no frameworks. */
+:root{
+  --bg:#f4f7f7; --surface:#ffffff; --ink:#15262b; --muted:#5b6f75; --line:#d9e2e4;
+  --accent:#0e6b6b; --accent-ink:#ffffff; --accent-soft:#dcefee;
+  --ok:#1b7a43; --ok-soft:#dff3e6; --warn:#8a5a00; --warn-soft:#fbefd2; --bad:#a32727; --bad-soft:#fae0e0;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --display:'Space Grotesk','Inter',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1b1e; --surface:#16272b; --ink:#e4eef0; --muted:#94aab0; --line:#27393e;
+  --accent:#4fbdbd; --accent-ink:#06191a; --accent-soft:#18383a;
+  --ok:#6fd59a; --ok-soft:#173a27; --warn:#f0c46a; --warn-soft:#3a2f12; --bad:#f19292; --bad-soft:#3b1b1b;
+  color-scheme:dark}}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:1.6rem} h2{font-size:1.35rem} h3{font-size:1.05rem}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+.wrap{max-width:1000px;margin:0 auto}
+
+/* header + navigation */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:16px 0 8px}
+.brand{font-family:var(--display);font-weight:700;font-size:1.15rem;margin-right:auto}
+.brand small{display:block;font-family:var(--font);font-weight:400;font-size:.75rem;color:var(--muted);letter-spacing:.02em}
+.who{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:.85rem;color:var(--muted)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tabs a{border-bottom:3px solid transparent;padding:10px 14px;font-weight:500;color:var(--muted);text-decoration:none}
+.tabs a:hover{color:var(--ink)}
+.tabs a[aria-current="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* buttons and form fields */
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{display:inline-block;background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;padding:8px 14px;
+  font-weight:600;cursor:pointer;text-decoration:none;line-height:1.4}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.small{padding:4px 10px;font-size:.82rem}
+.btn.danger{background:var(--bad);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox],input[type=radio]{width:auto;margin-top:4px}
+label{display:block;font-size:.82rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+label.choice{display:flex;gap:10px;align-items:flex-start;font-size:.92rem;font-weight:400;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0;cursor:pointer}
+label.check{display:flex;gap:8px;align-items:center;font-size:.92rem;font-weight:500;color:var(--ink);margin:0}
+label.check input{margin:0}
+
+/* layout helpers */
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.row>*{min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.muted{color:var(--muted)} .small{font-size:.85rem}
+.sub{margin:4px 0 0}
+.actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+form.inline{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0}
+form.inline input{width:160px}
+.login{max-width:420px;margin:48px auto}
+
+/* tables */
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+.card.flush{padding:4px 16px}
+
+/* status badges */
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600}
+.pill.Confirmed{background:var(--accent-soft);color:var(--accent)}
+.pill.Completed,.pill.Available,.pill.Active{background:var(--ok-soft);color:var(--ok)}
+.pill.Cancelled,.pill.Unavailable,.pill.Inactive{background:var(--bad-soft);color:var(--bad)}
+.pill.No-show,.pill.Pending{background:var(--warn-soft);color:var(--warn)}
+
+/* messages */
+.note{border-radius:8px;padding:10px 14px;font-size:.88rem;margin-bottom:16px}
+.note.info{background:var(--accent-soft)} .note.warn{background:var(--warn-soft);color:var(--warn)}
+.note.bad{background:var(--bad-soft);color:var(--bad)} .note.ok{background:var(--ok-soft);color:var(--ok)}
+.stack .note{margin-bottom:0}
+
+/* patient details */
+.kv{display:grid;grid-template-columns:140px 1fr;gap:4px 12px;font-size:.9rem;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
+
+/* phones: tables turn into stacked cards so the page never scrolls sideways */
+@media (max-width:640px){
+  .kv{grid-template-columns:1fr} .kv dt{margin-top:6px}
+  .login{margin:24px auto}
+  .tabs a{padding:8px 10px}
+  table.responsive,table.responsive tbody,table.responsive tr,table.responsive td{display:block;width:100%}
+  table.responsive thead{display:none}
+  table.responsive tr{padding:8px 0;border-bottom:1px solid var(--line)}
+  table.responsive tbody tr:last-child{border-bottom:0}
+  table.responsive td{border:0;padding:3px 0;display:flex;gap:12px;justify-content:space-between;text-align:right}
+  table.responsive td[data-label]::before{content:attr(data-label);flex:0 0 36%;text-align:left;color:var(--muted);
+    font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
+  table.responsive td>*{min-width:0}
+  table.responsive td:not([data-label]){justify-content:flex-start;text-align:left}
+  form.inline input{width:100%;flex:1 1 140px}
+}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <div>
+    <h2>My Schedule</h2>
+    <p class="muted sub">Patients can only book the days and hours listed here.</p>
+  </div>
+  <div class="card flush">
+    <table class="responsive">
+      <thead><tr><th>Day</th><th>Hours</th><th>Slots per day</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr><td data-label="Day">{{ r.day_of_week }}</td><td data-label="Hours">{{ r.time_start }} - {{ r.time_end }}</td>
+            <td data-label="Slots">{{ r.slot_limit }}</td>
+            <td data-label="Status"><span class="pill {{ r.availability_status }}">{{ r.availability_status }}</span></td>
+            <td><div class="actions">
+              <form class="inline" method="post" action="{{ url_for('schedule_action', schedule_id=r.schedule_id, action='toggle') }}">
+                <button class="btn small ghost">{{ 'Mark unavailable' if r.availability_status == 'Available' else 'Mark available' }}</button></form>
+              <form class="inline" method="post" action="{{ url_for('schedule_action', schedule_id=r.schedule_id, action='delete') }}"
+                    onsubmit="return confirm('Delete this schedule?')"><button class="btn small danger">Delete</button></form>
+            </div></td></tr>
+        {% else %}<tr><td colspan="5" class="muted">No schedules yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form method="post" class="card stack">
+    <h3>Add a schedule</h3>
+    <div class="grid">
+      <div><label for="sd">Day</label><select id="sd" name="day_of_week">{% for d in days %}<option>{{ d }}</option>{% endfor %}</select></div>
+      <div><label for="s1">From</label><input id="s1" type="time" name="time_start" required></div>
+      <div><label for="s2">To</label><input id="s2" type="time" name="time_end" required></div>
+      <div><label for="sl">Slots per day</label><input id="sl" type="number" name="slot_limit" min="1" max="99" required></div>
+    </div>
+    <div><button class="btn">Add schedule</button></div>
+  </form>
+</div>
+{% endblock %}

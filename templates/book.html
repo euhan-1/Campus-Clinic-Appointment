@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <div>
+    <h2>{{ 'Record a Visit (today)' if is_nurse else 'Book an Appointment' }}</h2>
+    <p class="muted sub">Only days with a doctor on duty and open slots can be booked.</p>
+  </div>
+
+  {# Step 1: who / when / what kind of visit #}
+  <form method="get" class="card stack">
+    <div class="grid">
+      {% if is_nurse %}
+        <div><label for="sn">Student / employee number</label>
+          <input id="sn" name="student_number" value="{{ form.get('student_number', '') }}" required></div>
+      {% else %}
+        <div><label for="bd">Date</label>
+          <input id="bd" type="date" name="date" min="{{ today }}" value="{{ day or '' }}" required></div>
+      {% endif %}
+      <div><label for="bt">Visit type</label>
+        <select id="bt" name="visit_type">
+          {% for t in ['Medical', 'Dental', 'Follow-up'] %}<option {{ 'selected' if t == visit_type }}>{{ t }}</option>{% endfor %}
+        </select></div>
+    </div>
+    <div><button class="btn ghost">Check available slots</button></div>
+  </form>
+
+  {% if patient and day %}
+    {% if is_nurse %}<p class="sub">Patient: <b>{{ patient.first_name }} {{ patient.last_name }}</b> ({{ patient.student_number }})</p>{% endif %}
+
+    {# Step 2: pick a slot #}
+    {% if options %}
+      <form method="post" class="card stack">
+        <input type="hidden" name="date" value="{{ day }}">
+        <input type="hidden" name="visit_type" value="{{ visit_type }}">
+        <input type="hidden" name="student_number" value="{{ patient.student_number }}">
+        <h3>{{ day.strftime('%A, %Y-%m-%d') }} - choose a doctor</h3>
+        {% for s in options %}
+          <label class="choice">
+            <input type="radio" name="schedule_id" value="{{ s.schedule_id }}" required {{ 'checked' if loop.first }}>
+            <span><b>Dr. {{ s.first_name }} {{ s.last_name }}</b> ({{ s.specialization }})<br>
+              <span class="muted small">{{ s.time_start }} - {{ s.time_end }} &middot; your time: {{ slot_time(s) }}</span><br>
+              <span class="pill Available">{{ s.slot_limit - s.used }} of {{ s.slot_limit }} slots left</span></span>
+          </label>
+        {% endfor %}
+        <div><label for="rs">Reason for the visit</label><input id="rs" name="reason" maxlength="100" required></div>
+        <div><button class="btn">Confirm appointment</button></div>
+      </form>
+    {% else %}
+      <div class="note bad">No {{ visit_type }} slots on {{ day }}: no doctor is on duty or all slots are full.</div>
+      {% if suggestions %}
+        <div class="card stack">
+          <h3>Next days with open slots</h3>
+          {% for d, n in suggestions %}
+            <div class="head">
+              {% if is_nurse %}
+                <span>{{ d.strftime('%A, %Y-%m-%d') }}</span>
+              {% else %}
+                <a href="{{ url_for('book', date=d.isoformat(), visit_type=visit_type) }}">{{ d.strftime('%A, %Y-%m-%d') }}</a>
+              {% endif %}
+              <span class="pill Available">{{ n }} slot(s)</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">No open days in the next 30 days.</p>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,433 @@
+<title>Campus Clinic Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: top bar with role tabs, one content column; tables scroll inside their own wrapper. */
+:root{
+  --bg:#f4f7f7; --surface:#ffffff; --ink:#15262b; --muted:#5b6f75; --line:#d9e2e4;
+  --accent:#0e6b6b; --accent-ink:#ffffff; --accent-soft:#dcefee;
+  --ok:#1b7a43; --ok-soft:#dff3e6; --warn:#8a5a00; --warn-soft:#fbefd2; --bad:#a32727; --bad-soft:#fae0e0;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --display:'Space Grotesk','Inter',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1b1e; --surface:#16272b; --ink:#e4eef0; --muted:#94aab0; --line:#27393e;
+  --accent:#4fbdbd; --accent-ink:#06191a; --accent-soft:#18383a;
+  --ok:#6fd59a; --ok-soft:#173a27; --warn:#f0c46a; --warn-soft:#3a2f12; --bad:#f19292; --bad-soft:#3b1b1b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1b1e; --surface:#16272b; --ink:#e4eef0; --muted:#94aab0; --line:#27393e;
+  --accent:#4fbdbd; --accent-ink:#06191a; --accent-soft:#18383a;
+  --ok:#6fd59a; --ok-soft:#173a27; --warn:#f0c46a; --warn-soft:#3a2f12; --bad:#f19292; --bad-soft:#3b1b1b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.2}
+h2{font-size:1.35rem} h3{font-size:1.05rem}
+.wrap{max-width:1000px;margin:0 auto}
+a{color:var(--accent)}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:16px 0 8px}
+.brand{font-family:var(--display);font-weight:700;font-size:1.15rem;margin-right:auto}
+.brand small{display:block;font-family:var(--font);font-weight:400;font-size:.75rem;color:var(--muted);letter-spacing:.02em}
+.who{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted)}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font:inherit;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button[aria-current="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;padding:8px 14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.small{padding:4px 10px;font-size:.82rem}
+.btn.danger{background:var(--bad);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+textarea{min-height:70px;resize:vertical}
+label{display:block;font-size:.82rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.row>*{min-width:0}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
+.muted{color:var(--muted)} .small{font-size:.85rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);white-space:nowrap}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600}
+.pill.Confirmed{background:var(--accent-soft);color:var(--accent)}
+.pill.Completed,.pill.Available,.pill.Active{background:var(--ok-soft);color:var(--ok)}
+.pill.Cancelled,.pill.Unavailable,.pill.Inactive{background:var(--bad-soft);color:var(--bad)}
+.pill.No-show{background:var(--warn-soft);color:var(--warn)}
+.note{border-radius:8px;padding:10px 14px;font-size:.88rem}
+.note.info{background:var(--accent-soft)} .note.warn{background:var(--warn-soft);color:var(--warn)} .note.bad{background:var(--bad-soft);color:var(--bad)} .note.ok{background:var(--ok-soft);color:var(--ok)}
+.slot{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between}
+.login{max-width:420px;margin:48px auto}
+.demo{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:4px 12px;font-size:.9rem}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.big{font-family:var(--display);font-size:1.8rem;font-weight:700}
+.theme{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--muted)}
+@media (max-width:520px){.kv{grid-template-columns:1fr}.kv dt{margin-top:6px}}
+</style>
+<div class="wrap" id="app"></div>
+<script>
+(function(){
+"use strict";
+var KEY="campus-clinic-prototype-v1";
+var DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function pad(n){return String(n).padStart(2,"0")}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function parse(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function addDays(d,n){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);return x}
+function dayName(s){return DAYS[parse(s).getDay()]}
+function prettyDate(s){var d=parse(s);return DAYS[d.getDay()].slice(0,3)+", "+MONTHS[d.getMonth()].slice(0,3)+" "+d.getDate()+", "+d.getFullYear()}
+function t12(t){var p=t.split(":"),h=+p[0],m=p[1];return (h%12||12)+":"+m+" "+(h>=12?"PM":"AM")}
+function mins(t){var p=t.split(":");return +p[0]*60+ +p[1]}
+function fromMins(m){return pad(Math.floor(m/60))+":"+pad(m%60)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+
+/* ---------- sample data (same seven tables as the ERD) ---------- */
+function seed(){
+  var today=new Date(), t=iso(today);
+  function nextOn(name){for(var i=1;i<15;i++){var d=addDays(today,i);if(DAYS[d.getDay()]===name)return iso(d)}}
+  var db={
+    users:[
+      {user_id:1,username:"nurse",password:"demo123",full_name:"Clinic Nurse (sample)",role:"Nurse",status:"Active",date_created:t},
+      {user_id:2,username:"admin",password:"demo123",full_name:"Clinic Administrator (sample)",role:"Administrator",status:"Active",date_created:t},
+      {user_id:3,username:"doctor",password:"demo123",full_name:"Dr. Ramon Villanueva",role:"Doctor",status:"Active",date_created:t,doctor_id:1},
+      {user_id:4,username:"dentist",password:"demo123",full_name:"Dr. Carlo Dizon",role:"Doctor",status:"Active",date_created:t,doctor_id:3},
+      {user_id:5,username:"student",password:"demo123",full_name:"Juan Dela Cruz",role:"Patient",status:"Active",date_created:t,patient_id:1}
+    ],
+    patients:[
+      {patient_id:1,student_number:"2301234",patient_type:"Student",last_name:"Dela Cruz",first_name:"Juan",middle_name:"",department:"College of Computer Studies",year_level:"3rd Year",contact_number:"09171234567",email:"juan@example.com",guardian_name:"Rosa Dela Cruz",guardian_contact:"09181234567",date_registered:t},
+      {patient_id:2,student_number:"2304567",patient_type:"Student",last_name:"Santos",first_name:"Maria",middle_name:"L.",department:"College of Nursing",year_level:"2nd Year",contact_number:"09191112222",email:"",guardian_name:"Elena Santos",guardian_contact:"09201112222",date_registered:t},
+      {patient_id:3,student_number:"2209876",patient_type:"Student",last_name:"Reyes",first_name:"Pedro",middle_name:"",department:"Senior High School",year_level:"Grade 12",contact_number:"09223334444",email:"",guardian_name:"Marco Reyes",guardian_contact:"09223335555",date_registered:t},
+      {patient_id:4,student_number:"E-0045",patient_type:"Employee",last_name:"Garcia",first_name:"Ana",middle_name:"",department:"Registrar's Office",year_level:"",contact_number:"09305556666",email:"",guardian_name:"",guardian_contact:"",date_registered:t}
+    ],
+    doctors:[
+      {doctor_id:1,last_name:"Villanueva",first_name:"Ramon",specialization:"Physician",license_number:"PRC-0001",contact_number:"",employment_type:"Part-time",status:"Active"},
+      {doctor_id:2,last_name:"Mendoza",first_name:"Lorna",specialization:"Physician",license_number:"PRC-0002",contact_number:"",employment_type:"Part-time",status:"Active"},
+      {doctor_id:3,last_name:"Dizon",first_name:"Carlo",specialization:"Dentist",license_number:"PRC-0003",contact_number:"",employment_type:"Part-time",status:"Active"}
+    ],
+    schedules:[
+      {schedule_id:1,doctor_id:1,day_of_week:"Monday",time_start:"08:00",time_end:"12:00",slot_limit:6,availability_status:"Available"},
+      {schedule_id:2,doctor_id:1,day_of_week:"Wednesday",time_start:"08:00",time_end:"12:00",slot_limit:6,availability_status:"Available"},
+      {schedule_id:3,doctor_id:1,day_of_week:"Friday",time_start:"08:00",time_end:"12:00",slot_limit:6,availability_status:"Available"},
+      {schedule_id:4,doctor_id:2,day_of_week:"Tuesday",time_start:"13:00",time_end:"16:00",slot_limit:5,availability_status:"Available"},
+      {schedule_id:5,doctor_id:2,day_of_week:"Thursday",time_start:"13:00",time_end:"16:00",slot_limit:5,availability_status:"Available"},
+      {schedule_id:6,doctor_id:3,day_of_week:"Monday",time_start:"13:00",time_end:"16:00",slot_limit:4,availability_status:"Available"},
+      {schedule_id:7,doctor_id:3,day_of_week:"Wednesday",time_start:"13:00",time_end:"16:00",slot_limit:4,availability_status:"Available"}
+    ],
+    appointments:[],consultations:[],reports:[],
+    next:{user:6,patient:5,doctor:4,schedule:8,appointment:1,consultation:1,report:1}
+  };
+  var m=nextOn("Monday");
+  db.appointments.push({appointment_id:1,patient_id:1,schedule_id:1,appointment_date:m,appointment_time:"09:00",visit_type:"Medical",reason:"Headache and dizziness",status:"Confirmed",date_requested:t});
+  db.appointments.push({appointment_id:2,patient_id:2,schedule_id:1,appointment_date:m,appointment_time:"09:30",visit_type:"Medical",reason:"Follow-up check",status:"Confirmed",date_requested:t});
+  db.appointments.push({appointment_id:3,patient_id:3,schedule_id:6,appointment_date:m,appointment_time:"13:30",visit_type:"Dental",reason:"Toothache",status:"Confirmed",date_requested:t});
+  db.next.appointment=4;
+  function cons(pid,did,daysAgo,complaint,aid,find,med,lab,fu,ref){
+    db.consultations.push({consultation_id:db.next.consultation++,appointment_id:null,patient_id:pid,doctor_id:did,consultation_date:iso(addDays(today,-daysAgo)),complaint:complaint,first_aid_given:aid,findings:find,medicine_given:med,lab_request:lab,followup_required:fu,followup_date:"",referred_to_hospital:ref,remarks:""});
+  }
+  cons(2,1,3,"Stomach pain","Rest and water","Gastritis","Antacid, 1 tablet","",false,false);
+  cons(3,0,5,"Sprained ankle","Cold compress and bandage","","","",false,false);
+  cons(1,1,9,"Fever and cough","Temperature check","Viral infection","Paracetamol, 500 mg","CBC",true,false);
+  cons(4,0,12,"Fainting","Rest on bed, vital signs","Referred for further check","","",false,true);
+  return db;
+}
+
+var db;
+try{var raw=localStorage.getItem(KEY);db=raw?JSON.parse(raw):null}catch(e){db=null}
+if(!db||!db.users)db=seed();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+
+/* ---------- state ---------- */
+var S={user:null,view:null,msg:null,book:{type:"Medical",date:"",purpose:"",pick:{}},apptDate:iso(new Date()),apptStatus:"All",search:"",patientId:null,consult:null,repMonth:new Date().getMonth(),repYear:new Date().getFullYear(),theme:null};
+
+function find(table,key,val){return db[table].filter(function(r){return r[key]===val})[0]}
+function docName(d){return d?"Dr. "+d.first_name+" "+d.last_name:"Unassigned"}
+function patName(p){return p?p.last_name+", "+p.first_name:"Unknown"}
+function sched(a){return find("schedules","schedule_id",a.schedule_id)}
+function apptDoctor(a){var s=sched(a);return s?find("doctors","doctor_id",s.doctor_id):null}
+function left(s,date){
+  var n=db.appointments.filter(function(a){return a.schedule_id===s.schedule_id&&a.appointment_date===date&&a.status!=="Cancelled"}).length;
+  return s.slot_limit-n;
+}
+function msg(kind,text){S.msg={kind:kind,text:text}}
+
+/* ---------- roles ---------- */
+var NAV={
+  Patient:[["schedules","Doctor Schedules"],["book","Book Appointment"],["mine","My Appointments"],["profile","My Information"]],
+  Nurse:[["appts","Appointments"],["schedules","Doctor Schedules"],["patients","Patient Records"],["consult","Record Visit"],["reports","Monthly Report"]],
+  Administrator:[["appts","Appointments"],["schedules","Doctor Schedules"],["patients","Patient Records"],["reports","Monthly Report"],["users","User Access"]],
+  Doctor:[["myday","My Appointments"],["consult","Record Consultation"],["patients","Patient Records"],["myschedule","My Schedule"]]
+};
+
+/* ---------- views ---------- */
+function vLogin(){
+  return '<div class="login stack"><div><h1 style="font-size:1.6rem">Campus Clinic</h1><p class="muted" style="margin:4px 0 0">Appointment Scheduling and Records Management System. A working prototype with sample data.</p></div>'+
+  '<form class="card stack" id="loginForm"><div><label for="u">Username</label><input id="u" autocomplete="username" required></div><div><label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required></div>'+
+  (S.msg?'<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>':'')+
+  '<button class="btn" type="submit">Log in</button></form>'+
+  '<div class="card stack"><h3>Try it as</h3><div class="demo">'+
+  [["student","Patient"],["nurse","Clinic nurse"],["doctor","Doctor"],["admin","Administrator"]].map(function(x){return '<button class="btn ghost" data-act="demo" data-u="'+x[0]+'">'+x[1]+'</button>'}).join("")+
+  '</div><p class="muted small" style="margin:0">All sample accounts use the password demo123.</p></div></div>';
+}
+
+function vSchedules(editable){
+  var docs=db.doctors;
+  var rows=db.schedules.slice().sort(function(a,b){return DAYS.indexOf(a.day_of_week)-DAYS.indexOf(b.day_of_week)||a.time_start.localeCompare(b.time_start)});
+  var byDay=DAYS.slice(1).concat(DAYS[0]).map(function(day){
+    var items=rows.filter(function(s){return s.day_of_week===day});
+    var am=items.filter(function(s){return s.availability_status==="Available"&&mins(s.time_start)<720}).length;
+    return {day:day,items:items,am:am};
+  });
+  var gaps=byDay.filter(function(d){return d.day!=="Sunday"&&d.am===0}).map(function(d){return d.day});
+  var h='<div class="stack"><div><h2>Doctor Schedules</h2><p class="muted" style="margin:4px 0 0">Check who is on duty before going to the clinic.</p></div>';
+  h+='<div class="note info small">Sample schedule. The real hours are the ones posted on the wall of the Health Services Office.</div>';
+  h+='<div class="card scroll"><table><thead><tr><th>Day</th><th>Doctor</th><th>Type</th><th>Hours</th><th>Slots</th><th>Status</th></tr></thead><tbody>';
+  byDay.forEach(function(d){
+    if(!d.items.length){h+='<tr><td>'+d.day+'</td><td colspan="5" class="muted">No doctor on duty</td></tr>';return}
+    d.items.forEach(function(s,i){var doc=find("doctors","doctor_id",s.doctor_id);
+      h+='<tr><td>'+(i?"":d.day)+'</td><td>'+esc(docName(doc))+'</td><td>'+esc(doc.specialization)+'</td><td>'+t12(s.time_start)+" to "+t12(s.time_end)+'</td><td>'+s.slot_limit+' per day</td><td><span class="pill '+s.availability_status+'">'+s.availability_status+'</span></td></tr>'});
+  });
+  h+='</tbody></table></div>';
+  h+='<p class="muted small" style="margin:0">Days with no physician in the morning: '+(gaps.length?esc(gaps.join(", ")):"none")+'.</p></div>';
+  return h;
+}
+
+function openOptions(){
+  var b=S.book,res=[];
+  if(!b.date)return res;
+  var need=b.type==="Dental"?"Dentist":"Physician";
+  db.schedules.forEach(function(s){
+    var d=find("doctors","doctor_id",s.doctor_id);
+    if(d.specialization!==need||d.status!=="Active"||s.day_of_week!==dayName(b.date)||s.availability_status!=="Available")return;
+    res.push({s:s,d:d,left:left(s,b.date)});
+  });
+  return res;
+}
+function nextDays(){
+  var b=S.book,need=b.type==="Dental"?"Dentist":"Physician",out=[],start=b.date?parse(b.date):new Date();
+  for(var i=1;i<=21&&out.length<3;i++){var d=addDays(start,i),n=DAYS[d.getDay()];
+    var ok=db.schedules.some(function(s){var doc=find("doctors","doctor_id",s.doctor_id);return s.day_of_week===n&&s.availability_status==="Available"&&doc.specialization===need&&left(s,iso(d))>0});
+    if(ok)out.push(iso(d))}
+  return out;
+}
+function vBook(){
+  var b=S.book,today=iso(new Date()),h='<div class="stack"><div><h2>Book an Appointment</h2><p class="muted" style="margin:4px 0 0">Pick a visit type and a date. Only days with a doctor on duty and open slots can be booked.</p></div>';
+  h+='<div class="card"><div class="grid"><div><label for="bt">Visit type</label><select id="bt" data-f="type">'+["Medical","Dental","Follow-up"].map(function(t){return '<option'+(b.type===t?" selected":"")+'>'+t+'</option>'}).join("")+'</select></div>'+
+     '<div><label for="bd">Date</label><input id="bd" type="date" min="'+today+'" value="'+esc(b.date)+'" data-f="date"></div>'+
+     '<div><label for="bp">Reason for visit</label><input id="bp" value="'+esc(b.purpose)+'" data-f="purpose" placeholder="For example: fever, toothache"></div></div></div>';
+  if(S.msg)h+='<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>';
+  if(b.date){
+    var opts=openOptions();
+    h+='<h3>'+prettyDate(b.date)+'</h3>';
+    if(!opts.length){
+      var nd=nextDays();
+      h+='<div class="note bad">No '+(b.type==="Dental"?"dentist":"physician")+' is on duty on '+dayName(b.date)+'.'+(nd.length?' Next available days: '+nd.map(function(x){return '<a href="#" data-act="pickdate" data-d="'+x+'">'+prettyDate(x)+'</a>'}).join(", ")+'.':'')+'</div>';
+    }else{
+      opts.forEach(function(o){
+        var times=[];for(var m=mins(o.s.time_start);m<mins(o.s.time_end);m+=30)times.push(fromMins(m));
+        var taken=db.appointments.filter(function(a){return a.schedule_id===o.s.schedule_id&&a.appointment_date===b.date&&a.status!=="Cancelled"}).map(function(a){return a.appointment_time});
+        var free=times.filter(function(t){return taken.indexOf(t)<0});
+        h+='<div class="card slot"><div><strong>'+esc(docName(o.d))+'</strong><div class="muted small">'+esc(o.d.specialization)+' &middot; '+t12(o.s.time_start)+' to '+t12(o.s.time_end)+'</div><div class="small" style="margin-top:4px">'+(o.left>0?'<span class="pill Available">'+o.left+' of '+o.s.slot_limit+' slots left</span>':'<span class="pill Cancelled">Fully booked</span>')+'</div></div>';
+        if(o.left>0&&free.length){
+          h+='<div class="row"><div><label for="t'+o.s.schedule_id+'">Time</label><select id="t'+o.s.schedule_id+'" data-pick="'+o.s.schedule_id+'">'+free.map(function(t){return '<option value="'+t+'"'+((b.pick[o.s.schedule_id]||free[0])===t?" selected":"")+'>'+t12(t)+'</option>'}).join("")+'</select></div><button class="btn" data-act="book" data-s="'+o.s.schedule_id+'">Book</button></div>';
+        }
+        h+='</div>';
+      });
+    }
+  }
+  return h+'</div>';
+}
+
+function apptRow(a,mode){
+  var p=find("patients","patient_id",a.patient_id),d=apptDoctor(a),btn="";
+  if(mode==="staff"&&a.status==="Confirmed")btn='<button class="btn small ghost" data-act="status" data-id="'+a.appointment_id+'" data-v="No-show">No-show</button> <button class="btn small danger" data-act="status" data-id="'+a.appointment_id+'" data-v="Cancelled">Cancel</button>';
+  if(mode==="mine"&&a.status==="Confirmed")btn='<button class="btn small danger" data-act="status" data-id="'+a.appointment_id+'" data-v="Cancelled">Cancel</button>';
+  if(mode==="doctor"&&a.status==="Confirmed")btn='<button class="btn small" data-act="record" data-id="'+a.appointment_id+'">Record visit</button>';
+  return '<tr><td>'+prettyDate(a.appointment_date)+'<div class="muted small">'+t12(a.appointment_time)+'</div></td>'+(mode==="mine"?"":'<td>'+esc(patName(p))+'<div class="muted small">'+esc(p?p.student_number:"")+'</div></td>')+(mode==="doctor"?"":'<td>'+esc(docName(d))+'</td>')+'<td>'+esc(a.visit_type)+'<div class="muted small">'+esc(a.reason)+'</div></td><td><span class="pill '+a.status+'">'+a.status+'</span></td><td>'+btn+'</td></tr>';
+}
+function apptTable(list,mode){
+  if(!list.length)return '<div class="card muted">No appointments to show.</div>';
+  var head='<th>When</th>'+(mode==="mine"?"":'<th>Patient</th>')+(mode==="doctor"?"":'<th>Doctor</th>')+'<th>Visit</th><th>Status</th><th></th>';
+  return '<div class="card scroll"><table><thead><tr>'+head+'</tr></thead><tbody>'+list.map(function(a){return apptRow(a,mode)}).join("")+'</tbody></table></div>';
+}
+function sortAppts(l){return l.slice().sort(function(a,b){return (a.appointment_date+a.appointment_time).localeCompare(b.appointment_date+b.appointment_time)})}
+function vMine(){
+  var l=sortAppts(db.appointments.filter(function(a){return a.patient_id===S.user.patient_id}));
+  return '<div class="stack"><div><h2>My Appointments</h2></div>'+(S.msg?'<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>':'')+apptTable(l,"mine")+'</div>';
+}
+function vAppts(){
+  var l=db.appointments.filter(function(a){return (!S.apptDate||a.appointment_date===S.apptDate)&&(S.apptStatus==="All"||a.status===S.apptStatus)});
+  return '<div class="stack"><div><h2>Appointments</h2><p class="muted" style="margin:4px 0 0">Update the status when a patient does not show up or cancels.</p></div>'+
+   '<div class="row"><div><label for="ad">Date</label><input id="ad" type="date" value="'+esc(S.apptDate)+'" data-f="apptDate"></div><div><label for="as">Status</label><select id="as" data-f="apptStatus">'+["All","Confirmed","Completed","Cancelled","No-show"].map(function(s){return '<option'+(S.apptStatus===s?" selected":"")+'>'+s+'</option>'}).join("")+'</select></div><button class="btn ghost" data-act="alldates">All dates</button></div>'+
+   apptTable(sortAppts(l),"staff")+'</div>';
+}
+function vMyDay(){
+  var did=S.user.doctor_id;
+  var l=sortAppts(db.appointments.filter(function(a){var s=sched(a);return s&&s.doctor_id===did&&a.status==="Confirmed"}));
+  return '<div class="stack"><div><h2>My Appointments</h2><p class="muted" style="margin:4px 0 0">Confirmed appointments booked on your schedule.</p></div>'+apptTable(l,"doctor")+'</div>';
+}
+
+function vMySchedule(){
+  var did=S.user.doctor_id,rows=db.schedules.filter(function(s){return s.doctor_id===did});
+  var h='<div class="stack"><div><h2>My Schedule</h2><p class="muted" style="margin:4px 0 0">Patients can only book the days and hours listed here.</p></div>'+(S.msg?'<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>':'');
+  h+='<div class="card scroll"><table><thead><tr><th>Day</th><th>Hours</th><th>Slots per day</th><th>Status</th><th></th></tr></thead><tbody>'+rows.map(function(s){
+    return '<tr><td>'+s.day_of_week+'</td><td>'+t12(s.time_start)+' to '+t12(s.time_end)+'</td><td>'+s.slot_limit+'</td><td><span class="pill '+s.availability_status+'">'+s.availability_status+'</span></td><td><button class="btn small ghost" data-act="togglesched" data-id="'+s.schedule_id+'">Mark '+(s.availability_status==="Available"?"unavailable":"available")+'</button></td></tr>'}).join("")+'</tbody></table></div>';
+  h+='<form class="card stack" id="schedForm"><h3>Add a schedule</h3><div class="grid"><div><label for="sd">Day</label><select id="sd">'+DAYS.slice(1).concat(DAYS[0]).map(function(d){return '<option>'+d+'</option>'}).join("")+'</select></div><div><label for="s1">From</label><input id="s1" type="time" value="08:00" required></div><div><label for="s2">To</label><input id="s2" type="time" value="12:00" required></div><div><label for="sl">Slots per day</label><input id="sl" type="number" min="1" max="30" value="6" required></div></div><div><button class="btn" type="submit">Add schedule</button></div></form></div>';
+  return h;
+}
+
+function vPatients(){
+  if(S.patientId)return vPatientDetail();
+  var q=S.search.toLowerCase(),l=db.patients.filter(function(p){return !q||(p.first_name+" "+p.last_name+" "+p.student_number).toLowerCase().indexOf(q)>=0});
+  var h='<div class="stack"><div class="head"><div><h2>Patient Records</h2><p class="muted" style="margin:4px 0 0">Only nurses and doctors can open these records.</p></div></div>';
+  h+='<div class="row"><div style="flex:1;min-width:220px"><label for="sq">Search by first name, last name, or student number</label><input id="sq" value="'+esc(S.search)+'" data-f="search" placeholder="Type a name or number"></div></div>';
+  if(S.msg)h+='<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>';
+  h+='<div class="card scroll"><table><thead><tr><th>Name</th><th>Number</th><th>Type</th><th>Department</th><th></th></tr></thead><tbody>'+(l.length?l.map(function(p){return '<tr><td>'+esc(patName(p))+'</td><td>'+esc(p.student_number)+'</td><td>'+esc(p.patient_type)+'</td><td>'+esc(p.department)+'</td><td><button class="btn small ghost" data-act="open" data-id="'+p.patient_id+'">Open</button></td></tr>'}).join(""):'<tr><td colspan="5" class="muted">No patient found.</td></tr>')+'</tbody></table></div>';
+  h+=patientForm(null,"newPatient","Register a patient");
+  return h+'</div>';
+}
+function patientForm(p,id,title){
+  p=p||{};
+  function f(k,lab,type,req){return '<div><label for="'+id+k+'">'+lab+'</label><input id="'+id+k+'" type="'+(type||"text")+'" value="'+esc(p[k]||"")+'"'+(req?" required":"")+'></div>'}
+  return '<form class="card stack" id="'+id+'"><h3>'+title+'</h3><div class="grid">'+f("student_number","Student or employee number","text",1)+
+   '<div><label for="'+id+'patient_type">Type</label><select id="'+id+'patient_type">'+["Student","Employee","Faculty"].map(function(t){return '<option'+(p.patient_type===t?" selected":"")+'>'+t+'</option>'}).join("")+'</select></div>'+
+   f("last_name","Last name","text",1)+f("first_name","First name","text",1)+f("middle_name","Middle name")+f("department","College or department","text",1)+f("year_level","Year level")+f("contact_number","Contact number","tel",1)+f("email","Email","email")+f("guardian_name","Guardian name")+f("guardian_contact","Guardian contact","tel")+'</div><div><button class="btn" type="submit">Save</button></div></form>';
+}
+function vPatientDetail(){
+  var p=find("patients","patient_id",S.patientId),vis=db.consultations.filter(function(c){return c.patient_id===p.patient_id}).sort(function(a,b){return b.consultation_date.localeCompare(a.consultation_date)});
+  var h='<div class="stack"><div class="head"><h2>'+esc(patName(p))+'</h2><button class="btn ghost" data-act="back">Back to list</button></div>';
+  h+='<div class="card"><dl class="kv"><dt>Number</dt><dd>'+esc(p.student_number)+' ('+esc(p.patient_type)+')</dd><dt>Department</dt><dd>'+esc(p.department)+(p.year_level?', '+esc(p.year_level):'')+'</dd><dt>Contact</dt><dd>'+esc(p.contact_number)+(p.email?' &middot; '+esc(p.email):'')+'</dd><dt>Guardian</dt><dd>'+esc(p.guardian_name||"None on file")+(p.guardian_contact?' &middot; '+esc(p.guardian_contact):'')+'</dd></dl></div>';
+  h+='<h3>Visit history</h3><div class="card scroll"><table><thead><tr><th>Date</th><th>Complaint</th><th>First aid</th><th>Findings</th><th>Medicine</th><th>Notes</th></tr></thead><tbody>'+(vis.length?vis.map(function(c){
+    return '<tr><td>'+prettyDate(c.consultation_date)+'<div class="muted small">'+esc(docName(find("doctors","doctor_id",c.doctor_id)))+'</div></td><td>'+esc(c.complaint)+'</td><td>'+esc(c.first_aid_given||"-")+'</td><td>'+esc(c.findings||"-")+'</td><td>'+esc(c.medicine_given||"-")+'</td><td>'+(c.referred_to_hospital?'<span class="pill No-show">Referred to hospital</span> ':'')+(c.followup_required?'<span class="pill Confirmed">Follow-up'+(c.followup_date?' '+prettyDate(c.followup_date):'')+'</span> ':'')+(c.lab_request?'Lab: '+esc(c.lab_request):'')+'</td></tr>'}).join(""):'<tr><td colspan="6" class="muted">No visits recorded yet.</td></tr>')+'</tbody></table></div></div>';
+  return h;
+}
+function vProfile(){
+  var p=find("patients","patient_id",S.user.patient_id);
+  return '<div class="stack"><div><h2>My Information</h2><p class="muted" style="margin:4px 0 0">Keep your contact details current so the clinic can reach you.</p></div>'+(S.msg?'<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>':'')+patientForm(p,"myInfo","Your details")+'</div>';
+}
+
+function vConsult(){
+  var isDoc=S.user.role==="Doctor",c=S.consult||{};
+  var h='<div class="stack"><div><h2>'+(isDoc?"Record Consultation":"Record Visit")+'</h2><p class="muted" style="margin:4px 0 0">Saving a record also marks the linked appointment as completed.</p></div>'+(S.msg?'<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>':'');
+  h+='<form class="card stack" id="consultForm"><div class="grid"><div><label for="cp">Patient</label><select id="cp" required><option value="">Choose a patient</option>'+db.patients.map(function(p){return '<option value="'+p.patient_id+'"'+(c.patient_id===p.patient_id?" selected":"")+'>'+esc(patName(p))+' ('+esc(p.student_number)+')</option>'}).join("")+'</select></div>';
+  if(isDoc)h+='<div><label>Attending doctor</label><input value="'+esc(docName(find("doctors","doctor_id",S.user.doctor_id)))+'" disabled></div>';
+  else h+='<div><label for="cd">Attending doctor</label><select id="cd">'+db.doctors.map(function(d){return '<option value="'+d.doctor_id+'">'+esc(docName(d))+'</option>'}).join("")+'</select></div>';
+  h+='<div><label for="cdt">Date</label><input id="cdt" type="date" value="'+iso(new Date())+'" required></div></div>'+
+  '<div class="grid"><div><label for="cc">Complaint</label><textarea id="cc" required>'+esc(c.reason||"")+'</textarea></div><div><label for="cf">First aid given</label><textarea id="cf"></textarea></div><div><label for="cn">Findings or diagnosis</label><textarea id="cn"></textarea></div><div><label for="cm">Medicine given</label><textarea id="cm"></textarea></div></div>'+
+  '<div class="grid"><div><label for="cl">Laboratory request</label><input id="cl"></div><div><label for="cfd">Follow-up date (leave empty if none)</label><input id="cfd" type="date"></div><div><label for="cr">Remarks</label><input id="cr"></div></div>'+
+  '<div class="row"><label style="display:flex;gap:8px;align-items:center;margin:0"><input id="chosp" type="checkbox" style="width:auto"> Referred to a hospital</label></div>'+
+  '<div><button class="btn" type="submit">Save record</button></div></form></div>';
+  return h;
+}
+
+function vReports(){
+  var m=S.repMonth,y=S.repYear;
+  var list=db.consultations.filter(function(c){var d=parse(c.consultation_date);return d.getMonth()===m&&d.getFullYear()===y});
+  var r={visits:list.length,cons:list.filter(function(c){return c.findings}).length,aid:list.filter(function(c){return c.first_aid_given}).length,ref:list.filter(function(c){return c.referred_to_hospital}).length};
+  var h='<div class="stack"><div><h2>Monthly Report</h2><p class="muted" style="margin:4px 0 0">Counted from the consultation records, so nobody has to tally the log sheets by hand.</p></div>'+(S.msg?'<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>':'');
+  h+='<div class="row"><div><label for="rm">Month</label><select id="rm" data-f="repMonth">'+MONTHS.map(function(n,i){return '<option value="'+i+'"'+(i===m?" selected":"")+'>'+n+'</option>'}).join("")+'</select></div><div><label for="ry">Year</label><input id="ry" type="number" value="'+y+'" data-f="repYear" style="width:100px"></div></div>';
+  h+='<div class="grid">'+[["Total visits",r.visits],["Consultations with findings",r.cons],["First aid cases",r.aid],["Hospital referrals",r.ref]].map(function(x){return '<div class="card"><div class="muted small">'+x[0]+'</div><div class="big">'+x[1]+'</div></div>'}).join("")+'</div>';
+  h+='<div><button class="btn" data-act="genreport">Save this report</button></div>';
+  h+='<h3>Saved reports</h3><div class="card scroll"><table><thead><tr><th>Period</th><th>Visits</th><th>Consultations</th><th>First aid</th><th>Referrals</th><th>Generated by</th></tr></thead><tbody>'+(db.reports.length?db.reports.slice().reverse().map(function(x){var u=find("users","user_id",x.generated_by);return '<tr><td>'+MONTHS[x.report_month]+' '+x.report_year+'</td><td>'+x.total_visits+'</td><td>'+x.total_consultations+'</td><td>'+x.total_first_aid+'</td><td>'+x.total_referrals+'</td><td>'+esc(u?u.full_name:"")+'<div class="muted small">'+prettyDate(x.date_generated)+'</div></td></tr>'}).join(""):'<tr><td colspan="6" class="muted">No reports saved yet.</td></tr>')+'</tbody></table></div></div>';
+  return h;
+}
+
+function vUsers(){
+  var h='<div class="stack"><div><h2>User Access</h2><p class="muted" style="margin:4px 0 0">Create accounts and switch them on or off.</p></div>'+(S.msg?'<div class="note '+S.msg.kind+'">'+esc(S.msg.text)+'</div>':'');
+  h+='<div class="card scroll"><table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>'+db.users.map(function(u){return '<tr><td>'+esc(u.full_name)+'</td><td>'+esc(u.username)+'</td><td>'+u.role+'</td><td><span class="pill '+u.status+'">'+u.status+'</span></td><td>'+(u.user_id===S.user.user_id?'':'<button class="btn small ghost" data-act="toggleuser" data-id="'+u.user_id+'">'+(u.status==="Active"?"Deactivate":"Activate")+'</button>')+'</td></tr>'}).join("")+'</tbody></table></div>';
+  h+='<form class="card stack" id="userForm"><h3>Add an account</h3><div class="grid"><div><label for="nf">Full name</label><input id="nf" required></div><div><label for="nu">Username</label><input id="nu" required></div><div><label for="np">Password</label><input id="np" type="password" required></div><div><label for="nr">Role</label><select id="nr"><option>Nurse</option><option>Administrator</option></select></div></div><div><button class="btn" type="submit">Create account</button></div></form></div>';
+  return h;
+}
+
+/* ---------- shell ---------- */
+function render(){
+  var app=document.getElementById("app");
+  if(!S.user){app.innerHTML=vLogin();return}
+  var nav=NAV[S.user.role];
+  if(!S.view||!nav.some(function(n){return n[0]===S.view}))S.view=nav[0][0];
+  var body={schedules:function(){return vSchedules()},book:vBook,mine:vMine,profile:vProfile,appts:vAppts,patients:vPatients,consult:vConsult,reports:vReports,users:vUsers,myday:vMyDay,myschedule:vMySchedule}[S.view]();
+  app.innerHTML='<div class="top"><div class="brand">Campus Clinic<small>Appointment Scheduling and Records</small></div><div class="who"><span>'+esc(S.user.full_name)+' &middot; '+S.user.role+'</span><button class="theme" data-act="theme" aria-label="Switch light or dark theme">Theme</button><button class="btn ghost small" data-act="logout">Log out</button></div></div>'+
+   '<nav class="tabs" aria-label="Sections">'+nav.map(function(n){return '<button data-act="nav" data-v="'+n[0]+'" aria-current="'+(n[0]===S.view)+'">'+n[1]+'</button>'}).join("")+'</nav><main>'+body+'</main>'+
+   '<p class="muted small" style="margin-top:32px">Prototype with sample data stored in this browser only. <a href="#" data-act="reset">Reset sample data</a></p>';
+}
+function go(v){S.view=v;S.msg=null;S.patientId=null;S.consult=null;render();window.scrollTo(0,0)}
+
+/* ---------- actions ---------- */
+function login(u,p){
+  var user=db.users.filter(function(x){return x.username===u.trim()&&x.password===p})[0];
+  if(!user){msg("bad","Wrong username or password.");render();return}
+  if(user.status!=="Active"){msg("bad","This account is inactive. Ask the administrator to activate it.");render();return}
+  S.user=user;S.view=null;S.msg=null;render();
+}
+document.addEventListener("click",function(e){
+  var el=e.target.closest("[data-act]");if(!el)return;
+  var a=el.getAttribute("data-act");
+  if(a==="pickdate"||a==="reset"||a==="demo")e.preventDefault();
+  if(a==="demo"){login(el.getAttribute("data-u"),"demo123");return}
+  if(a==="nav"){go(el.getAttribute("data-v"));return}
+  if(a==="logout"){S.user=null;S.msg=null;render();return}
+  if(a==="theme"){var dark=getComputedStyle(document.body).backgroundColor!=="rgb(244, 247, 247)";S.theme=dark?"light":"dark";document.documentElement.setAttribute("data-theme",S.theme);return}
+  if(a==="reset"){db=seed();save();S.user=null;S.msg=null;render();return}
+  if(a==="pickdate"){S.book.date=el.getAttribute("data-d");S.msg=null;render();return}
+  if(a==="book"){
+    var sid=+el.getAttribute("data-s"),s=find("schedules","schedule_id",sid),b=S.book,time=S.book.pick[sid]||document.getElementById("t"+sid).value;
+    if(!b.purpose.trim()){msg("warn","Please enter the reason for your visit first.");render();return}
+    if(s.availability_status!=="Available"||left(s,b.date)<1){msg("bad","That slot is no longer available. Please pick another.");render();return}
+    var dup=db.appointments.some(function(x){return x.schedule_id===sid&&x.appointment_date===b.date&&x.appointment_time===time&&x.status!=="Cancelled"});
+    if(dup){msg("bad","That time was just taken. Please pick another time.");render();return}
+    db.appointments.push({appointment_id:db.next.appointment++,patient_id:S.user.patient_id,schedule_id:sid,appointment_date:b.date,appointment_time:time,visit_type:b.type,reason:b.purpose.trim(),status:"Confirmed",date_requested:iso(new Date())});
+    save();S.book={type:b.type,date:"",purpose:"",pick:{}};msg("ok","Appointment confirmed for "+prettyDate(db.appointments[db.appointments.length-1].appointment_date)+" at "+t12(time)+".");S.view="mine";render();return}
+  if(a==="status"){var ap=find("appointments","appointment_id",+el.getAttribute("data-id"));ap.status=el.getAttribute("data-v");save();msg("ok","Appointment marked as "+ap.status+".");render();return}
+  if(a==="alldates"){S.apptDate="";render();return}
+  if(a==="open"){S.patientId=+el.getAttribute("data-id");S.msg=null;render();return}
+  if(a==="back"){S.patientId=null;render();return}
+  if(a==="record"){var ap2=find("appointments","appointment_id",+el.getAttribute("data-id"));S.consult={patient_id:ap2.patient_id,reason:ap2.reason,appointment_id:ap2.appointment_id};S.view="consult";S.msg=null;render();return}
+  if(a==="togglesched"){var sc=find("schedules","schedule_id",+el.getAttribute("data-id"));sc.availability_status=sc.availability_status==="Available"?"Unavailable":"Available";save();msg("ok","Schedule updated. Patients see the change right away.");render();return}
+  if(a==="toggleuser"){var us=find("users","user_id",+el.getAttribute("data-id"));us.status=us.status==="Active"?"Inactive":"Active";save();msg("ok",us.full_name+" is now "+us.status+".");render();return}
+  if(a==="genreport"){
+    var m=S.repMonth,y=S.repYear,list=db.consultations.filter(function(c){var d=parse(c.consultation_date);return d.getMonth()===m&&d.getFullYear()===y});
+    var rep={report_id:db.next.report++,report_month:m,report_year:y,total_visits:list.length,total_consultations:list.filter(function(c){return c.findings}).length,total_first_aid:list.filter(function(c){return c.first_aid_given}).length,total_referrals:list.filter(function(c){return c.referred_to_hospital}).length,generated_by:S.user.user_id,date_generated:iso(new Date())};
+    db.reports.push(rep);save();msg("ok","Report for "+MONTHS[m]+" "+y+" saved.");render();return}
+});
+document.addEventListener("change",function(e){
+  var t=e.target,f=t.getAttribute("data-f");
+  if(t.hasAttribute("data-pick")){S.book.pick[t.getAttribute("data-pick")]=t.value;return}
+  if(!f)return;
+  var v=t.value;
+  if(f==="type"||f==="date"||f==="purpose"){S.book[f]=v;if(f!=="purpose"){S.msg=null;render()}return}
+  if(f==="repMonth"){S.repMonth=+v}else if(f==="repYear"){S.repYear=+v||S.repYear}else S[f]=v;
+  S.msg=null;render();
+});
+document.addEventListener("input",function(e){
+  if(e.target.getAttribute("data-f")==="purpose")S.book.purpose=e.target.value;
+  if(e.target.getAttribute("data-f")==="search"){S.search=e.target.value;var pos=e.target.selectionStart;render();var el=document.getElementById("sq");if(el){el.focus();el.setSelectionRange(pos,pos)}}
+});
+function val(id){return document.getElementById(id).value}
+function readPatient(id){var o={};["student_number","patient_type","last_name","first_name","middle_name","department","year_level","contact_number","email","guardian_name","guardian_contact"].forEach(function(k){o[k]=val(id+k).trim()});return o}
+document.addEventListener("submit",function(e){
+  e.preventDefault();var id=e.target.id;
+  if(id==="loginForm"){login(val("u"),val("p"));return}
+  if(id==="newPatient"){
+    var o=readPatient("newPatient");
+    if(db.patients.some(function(p){return p.student_number===o.student_number})){msg("bad","A patient with that number is already registered.");render();return}
+    o.patient_id=db.next.patient++;o.date_registered=iso(new Date());db.patients.push(o);save();msg("ok",patName(o)+" was registered.");render();return}
+  if(id==="myInfo"){var p=find("patients","patient_id",S.user.patient_id),o2=readPatient("myInfo");Object.keys(o2).forEach(function(k){p[k]=o2[k]});save();msg("ok","Your information was saved.");render();return}
+  if(id==="schedForm"){
+    var s1=val("s1"),s2=val("s2");if(mins(s2)<=mins(s1)){msg("bad","The end time must be after the start time.");render();return}
+    db.schedules.push({schedule_id:db.next.schedule++,doctor_id:S.user.doctor_id,day_of_week:val("sd"),time_start:s1,time_end:s2,slot_limit:+val("sl"),availability_status:"Available"});save();msg("ok","Schedule added.");render();return}
+  if(id==="userForm"){
+    var un=val("nu").trim();if(db.users.some(function(u){return u.username===un})){msg("bad","That username is taken.");render();return}
+    db.users.push({user_id:db.next.user++,username:un,password:val("np"),full_name:val("nf").trim(),role:val("nr"),status:"Active",date_created:iso(new Date())});save();msg("ok","Account created.");render();return}
+  if(id==="consultForm"){
+    var did=S.user.role==="Doctor"?S.user.doctor_id:+val("cd"),fu=val("cfd");
+    var rec={consultation_id:db.next.consultation++,appointment_id:S.consult&&S.consult.appointment_id||null,patient_id:+val("cp"),doctor_id:did,consultation_date:val("cdt"),complaint:val("cc").trim(),first_aid_given:val("cf").trim(),findings:val("cn").trim(),medicine_given:val("cm").trim(),lab_request:val("cl").trim(),followup_required:!!fu,followup_date:fu,referred_to_hospital:document.getElementById("chosp").checked,remarks:val("cr").trim()};
+    db.consultations.push(rec);
+    if(rec.appointment_id){find("appointments","appointment_id",rec.appointment_id).status="Completed"}
+    save();S.consult=null;msg("ok","Visit recorded for "+patName(find("patients","patient_id",rec.patient_id))+".");render();return}
+});
+render();
+})();
+</script>

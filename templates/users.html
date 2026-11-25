@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <div>
+    <h2>User Access</h2>
+    <p class="muted sub">Create accounts, switch them on or off, and reset passwords.</p>
+  </div>
+  <div class="card flush">
+    <table class="responsive">
+      <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>Created</th><th></th></tr></thead>
+      <tbody>
+        {% for u in rows %}
+        <tr><td data-label="Name">{{ u.full_name }}</td><td data-label="Username">{{ u.username }}</td><td data-label="Role">{{ u.role }}</td>
+            <td data-label="Status"><span class="pill {{ u.status }}">{{ u.status }}</span></td>
+            <td data-label="Created">{{ u.date_created }}</td>
+            <td><div class="actions">
+              {% if u.user_id != session.user_id %}
+              <form class="inline" method="post" action="{{ url_for('user_action', user_id=u.user_id, action='toggle') }}">
+                <button class="btn small ghost">{{ 'Deactivate' if u.status == 'Active' else 'Activate' }}</button></form>
+              {% endif %}
+              <form class="inline" method="post" action="{{ url_for('user_action', user_id=u.user_id, action='reset') }}">
+                <input name="new_password" type="password" placeholder="New password" aria-label="New password for {{ u.username }}" required>
+                <button class="btn small">Reset</button></form>
+            </div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form method="post" class="card stack">
+    <h3>Add an account</h3>
+    <div class="grid">
+      <div><label for="nr">Role</label>
+        <select id="nr" name="role"><option>Patient</option><option>Nurse</option><option>Doctor</option><option>Administrator</option></select></div>
+      <div><label for="nu">Username</label><input id="nu" name="username" maxlength="30" required></div>
+      <div><label for="nf">Full name</label><input id="nf" name="full_name" maxlength="60" required></div>
+      <div><label for="np">Password</label><input id="np" name="password" type="password" required></div>
+    </div>
+    <p class="muted small" style="margin:0">Patient: use the student/employee number. Doctor: use the PRC license number. Both must already exist.</p>
+    <div><button class="btn">Create account</button></div>
+  </form>
+</div>
+{% endblock %}

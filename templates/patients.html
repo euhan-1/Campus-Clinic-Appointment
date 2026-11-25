@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <div class="head">
+    <div>
+      <h2>Patient Records</h2>
+      <p class="muted sub">Only nurses and doctors can open these records.</p>
+    </div>
+    {% if session.role == 'Nurse' %}<a class="btn" href="{{ url_for('patient_new') }}">Register new patient</a>{% endif %}
+  </div>
+  <form method="get" class="row">
+    <div style="flex:1;min-width:220px"><label for="sq">Search by name or student number</label>
+      <input id="sq" name="q" value="{{ term }}" placeholder="Type a name or number"></div>
+    <button class="btn">Search</button>
+  </form>
+  <div class="card flush">
+    <table class="responsive">
+      <thead><tr><th>Name</th><th>Number</th><th>Type</th><th>Department</th><th>Contact</th><th></th></tr></thead>
+      <tbody>
+        {% for p in rows %}
+        <tr><td data-label="Name">{{ p.last_name }}, {{ p.first_name }}</td><td data-label="Number">{{ p.student_number }}</td>
+            <td data-label="Type">{{ p.patient_type }}</td><td data-label="Department">{{ p.department }}</td>
+            <td data-label="Contact">{{ p.contact_number }}</td>
+            <td><a class="btn small ghost" href="{{ url_for('patient_view', patient_id=p.patient_id) }}">Open</a></td></tr>
+        {% else %}<tr><td colspan="6" class="muted">No patient found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

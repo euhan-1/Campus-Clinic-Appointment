@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <div>
+    <h2>Doctor Schedules</h2>
+    <p class="muted sub">Check who is on duty before going to the clinic.</p>
+  </div>
+  <div class="card flush">
+    <table class="responsive">
+      <thead><tr><th>Doctor</th><th>Type</th><th>Day</th><th>Hours</th><th>Slots</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr><td data-label="Doctor">Dr. {{ r.first_name }} {{ r.last_name }}</td><td data-label="Type">{{ r.specialization }}</td>
+            <td data-label="Day">{{ r.day_of_week }}</td><td data-label="Hours">{{ r.time_start }} - {{ r.time_end }}</td>
+            <td data-label="Slots">{{ r.slot_limit }} per day</td>
+            <td data-label="Status"><span class="pill {{ r.availability_status }}">{{ r.availability_status }}</span></td></tr>
+        {% else %}<tr><td colspan="6" class="muted">No schedules yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <div>
+    <h2>Register a Patient</h2>
+    <p class="muted sub">A login is created automatically: the username and first password are the student/employee number.</p>
+  </div>
+  <form method="post" class="card stack">
+    <div class="grid">
+      <div><label for="f1">Student / employee number *</label><input id="f1" name="student_number" maxlength="15" value="{{ f.get('student_number', '') }}" required></div>
+      <div><label for="f2">Patient type *</label>
+        <select id="f2" name="patient_type"><option>Student</option><option>Faculty</option><option>Staff</option></select></div>
+      <div><label for="f3">Last name *</label><input id="f3" name="last_name" maxlength="30" value="{{ f.get('last_name', '') }}" required></div>
+      <div><label for="f4">First name *</label><input id="f4" name="first_name" maxlength="30" value="{{ f.get('first_name', '') }}" required></div>
+      <div><label for="f5">Middle name</label><input id="f5" name="middle_name" maxlength="30" value="{{ f.get('middle_name', '') }}"></div>
+      <div><label for="f6">Department / college *</label><input id="f6" name="department" maxlength="50" value="{{ f.get('department', '') }}" required></div>
+      <div><label for="f7">Year level</label><input id="f7" name="year_level" maxlength="15" value="{{ f.get('year_level', '') }}"></div>
+      <div><label for="f8">Contact number *</label><input id="f8" name="contact_number" maxlength="15" value="{{ f.get('contact_number', '') }}" required></div>
+      <div><label for="f9">Email</label><input id="f9" type="email" name="email" maxlength="50" value="{{ f.get('email', '') }}"></div>
+      <div><label for="f10">Guardian name</label><input id="f10" name="guardian_name" maxlength="60" value="{{ f.get('guardian_name', '') }}"></div>
+      <div><label for="f11">Guardian contact</label><input id="f11" name="guardian_contact" maxlength="15" value="{{ f.get('guardian_contact', '') }}"></div>
+    </div>
+    <div class="row"><button class="btn">Register</button> <a class="btn ghost" href="{{ url_for('patients') }}">Cancel</a></div>
+  </form>
+</div>
+{% endblock %}

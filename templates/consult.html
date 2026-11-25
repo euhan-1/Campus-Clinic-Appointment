@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <div>
+    <h2>Record Consultation</h2>
+    <p class="muted sub">Saving the record marks this appointment as Completed.</p>
+  </div>
+  <div class="card">
+    <dl class="kv">
+      <dt>Patient</dt><dd>{{ a.first_name }} {{ a.last_name }}</dd>
+      <dt>Appointment</dt><dd>{{ a.appointment_date }} {{ a.appointment_time }} ({{ a.visit_type }})</dd>
+    </dl>
+  </div>
+  <form method="post" class="card stack">
+    <div class="grid">
+      <div><label for="cc">Complaint *</label><textarea id="cc" name="complaint" maxlength="150" required>{{ a.reason }}</textarea></div>
+      <div><label for="cf">First aid / treatment given</label><textarea id="cf" name="first_aid_given" maxlength="150"></textarea></div>
+      <div><label for="cn">Findings / diagnosis</label><textarea id="cn" name="findings" maxlength="200"></textarea></div>
+      <div><label for="cm">Medicine given</label><textarea id="cm" name="medicine_given" maxlength="150"></textarea></div>
+    </div>
+    <div class="grid">
+      <div><label for="cl">Laboratory request</label><input id="cl" name="lab_request" maxlength="100"></div>
+      <div><label for="cfd">Follow-up date</label><input id="cfd" type="date" name="followup_date"></div>
+      <div><label for="cr">Remarks</label><input id="cr" name="remarks" maxlength="200"></div>
+    </div>
+    <label class="check"><input type="checkbox" name="followup_required"> Follow-up required</label>
+    <label class="check"><input type="checkbox" name="referred_to_hospital"> Referred to a hospital</label>
+    <div class="row"><button class="btn">Save and mark Completed</button> <a class="btn ghost" href="{{ url_for('appointments') }}">Back</a></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus Clinic - University of Batangas</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+  {% if session.role %}
+    {# Menu per role: (page name, label) #}
+    {% if session.role == 'Patient' %}
+      {% set tabs = [('schedules', 'Doctor Schedules'), ('book', 'Book Appointment'), ('my_appointments', 'My Appointments'), ('me', 'My Information')] %}
+    {% elif session.role == 'Nurse' %}
+      {% set tabs = [('appointments', 'Appointments'), ('schedules', 'Doctor Schedules'), ('patients', 'Patient Records'), ('book', 'Record Visit'), ('report', 'Monthly Report')] %}
+    {% elif session.role == 'Doctor' %}
+      {% set tabs = [('appointments', 'My Appointments'), ('patients', 'Patient Records'), ('my_schedule', 'My Schedule')] %}
+    {% else %}
+      {% set tabs = [('users', 'User Access'), ('report', 'Monthly Report')] %}
+    {% endif %}
+    <header class="top">
+      <div class="brand">Campus Clinic<small>Appointment Scheduling and Records</small></div>
+      <div class="who">
+        <span>{{ session.full_name }} &middot; {{ session.role }}</span>
+        <a class="btn ghost small" href="{{ url_for('logout') }}">Log out</a>
+      </div>
+    </header>
+    <nav class="tabs" aria-label="Sections">
+      {% for page, label in tabs %}
+        {% set here = request.endpoint == page or (page == 'patients' and request.endpoint in ('patient_new', 'patient_view')) %}
+        <a href="{{ url_for(page) }}" aria-current="{{ 'true' if here else 'false' }}">{{ label }}</a>
+      {% endfor %}
+    </nav>
+  {% endif %}
+  <main>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="note {{ 'bad' if category == 'error' else category }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

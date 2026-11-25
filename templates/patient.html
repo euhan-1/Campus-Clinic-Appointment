@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <div class="head">
+    <h2>{{ 'My Information' if session.role == 'Patient' else p.last_name ~ ', ' ~ p.first_name }}</h2>
+    {% if session.role != 'Patient' %}<a class="btn ghost" href="{{ url_for('patients') }}">Back to list</a>{% endif %}
+  </div>
+  <div class="card">
+    <dl class="kv">
+      <dt>Number</dt><dd>{{ p.student_number }} ({{ p.patient_type }})</dd>
+      <dt>Name</dt><dd>{{ p.first_name }} {{ p.middle_name or '' }} {{ p.last_name }}</dd>
+      <dt>Department</dt><dd>{{ p.department }}{% if p.year_level %}, {{ p.year_level }}{% endif %}</dd>
+      <dt>Contact</dt><dd>{{ p.contact_number }}{% if p.email %} &middot; {{ p.email }}{% endif %}</dd>
+      <dt>Guardian</dt><dd>{{ p.guardian_name or 'None on file' }}{% if p.guardian_contact %} &middot; {{ p.guardian_contact }}{% endif %}</dd>
+      <dt>Registered</dt><dd>{{ p.date_registered }}</dd>
+    </dl>
+  </div>
+  {% if consults is not none %}
+    <h3>Visit history</h3>
+    <div class="card flush">
+      <table class="responsive">
+        <thead><tr><th>Date</th><th>Complaint</th><th>Findings</th><th>Medicine</th><th>Notes</th></tr></thead>
+        <tbody>
+          {% for c in consults %}
+          <tr><td data-label="Date"><span>{{ c.consultation_date }}<div class="muted small">Dr. {{ c.dlast }}</div></span></td>
+              <td data-label="Complaint">{{ c.complaint }}</td><td data-label="Findings">{{ c.findings or '-' }}</td>
+              <td data-label="Medicine">{{ c.medicine_given or '-' }}</td>
+              <td data-label="Notes"><span>
+                {% if c.referred_to_hospital %}<span class="pill No-show">Referred to hospital</span> {% endif %}
+                {% if c.followup_required %}<span class="pill Confirmed">Follow-up{% if c.followup_date %} {{ c.followup_date }}{% endif %}</span>{% endif %}
+                {% if not c.referred_to_hospital and not c.followup_required %}-{% endif %}
+              </span></td></tr>
+          {% else %}<tr><td colspan="5" class="muted">No visits recorded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

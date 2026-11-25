@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stack">
+  <h2>My Appointments</h2>
+  <div class="card flush">
+    <table class="responsive">
+      <thead><tr><th>When</th><th>Doctor</th><th>Visit</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr><td data-label="When"><span>{{ r.appointment_date }}<div class="muted small">{{ r.appointment_time }}</div></span></td>
+            <td data-label="Doctor">Dr. {{ r.last_name }}</td>
+            <td data-label="Visit"><span>{{ r.visit_type }}<div class="muted small">{{ r.reason }}</div></span></td>
+            <td data-label="Status"><span class="pill {{ r.status }}">{{ r.status }}</span></td>
+            <td>{% if r.status in ('Pending', 'Confirmed') %}
+              <form class="inline" method="post" action="{{ url_for('cancel', appointment_id=r.appointment_id) }}"
+                    onsubmit="return confirm('Cancel this appointment?')"><button class="btn small danger">Cancel</button></form>
+            {% endif %}</td></tr>
+        {% else %}<tr><td colspan="5" class="muted">No appointments yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

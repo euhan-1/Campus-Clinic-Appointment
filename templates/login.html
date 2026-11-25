@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="login stack">
+  <div>
+    <h1>Campus Clinic</h1>
+    <p class="muted sub">Appointment Scheduling and Records Management System<br>University of Batangas - Health Services Office</p>
+  </div>
+  <form method="post" class="card stack">
+    <div><label for="u">Username</label><input id="u" name="username" autocomplete="username" required autofocus></div>
+    <div><label for="p">Password</label><input id="p" name="password" type="password" autocomplete="current-password" required></div>
+    <button class="btn">Log in</button>
+  </form>
+</div>
+{% endblock %}
